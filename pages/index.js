@@ -30,8 +30,8 @@ export default class extends PureComponent {
     this._handleChangePassword = this._handleChangePassword.bind(this);
     this._handleClearUser = this._handleClearUser.bind(this);
     this._handleClearPassword = this._handleClearPassword.bind(this);
+    this._handleSubmitForm = this._handleSubmitForm.bind(this);
   }
-
 
   _handleChangeUser = (event) => this.setState({ userName: event.target.value });
 
@@ -46,6 +46,11 @@ export default class extends PureComponent {
     this.userPassInput.focus();
     this.setState({ userPassword: '' });
   };
+
+  _handleSubmitForm = () => {
+    // TODO: Validate form
+    console.log(`user: ${this.state.userName}, password: ${this.state.userPassword}`);
+  }
 
 
   render() {
@@ -104,7 +109,14 @@ export default class extends PureComponent {
                   ref={node => this.userPassInput = node}
                 />
 
-                <Button type="primary" htmlType="submit" className="login-form-button">Ingresar</Button>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  className="login-form-button"
+                  onClick={this._handleSubmitForm}
+                >
+                  Ingresar
+                </Button>
 
               </FormItem>
             </Form>
