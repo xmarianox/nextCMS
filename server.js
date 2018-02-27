@@ -10,6 +10,10 @@ app.prepare()
 .then(() => {
   const server = express();
 
+  server.post('/login', (req, res) => {
+    res.json({ data: req });
+  });
+
   server.get('*', (req, res) => {
     return handle(req, res);
   });
