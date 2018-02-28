@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react';
 import Head from 'next/head';
 import App from '../components/App';
+import fetch from 'isomorphic-fetch';
 
 import { 
   Layout,
@@ -49,7 +50,24 @@ export default class extends PureComponent {
 
   _handleSubmitForm = () => {
     // TODO: Validate form
-    console.log(`user: ${this.state.userName}, password: ${this.state.userPassword}`);
+    fetch('/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        logemail: this.state.userName,
+        logpassword: this.state.userPassword,
+      }),
+    })
+    .then((response) => response.json())
+    .then((json) => {
+      console.log(JSON.stringify(json));
+    })
+    .catch((err) => {
+      console.log(`Server error: ${err}`);
+    });
+
   }
 
 
