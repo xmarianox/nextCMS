@@ -5,6 +5,7 @@ import fetch from 'isomorphic-fetch';
 
 import { 
   Layout,
+  Alert,
   Form,
   Input,
   Icon,
@@ -21,7 +22,10 @@ export default class extends PureComponent {
 
     this.state = {
       userName: '',
+      emailValid: true,
       userPassword: '',
+      formValid: true,
+      errorMessage: ''
     };
 
     this.date = new Date().getFullYear();
@@ -48,8 +52,17 @@ export default class extends PureComponent {
     this.setState({ userPassword: '' });
   };
 
+  _validateEmail = (email) => {
+    const regex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return regex.test(String(email).toLowerCase());
+  };
+
   _handleSubmitForm = () => {
-    // TODO: Validate form
+
+    if (!this._validateEmail(this.state.userName)) {
+      this.setState({ emailValid: false });
+    }
+
     fetch('/login', {
       method: 'POST',
       headers: {
@@ -62,7 +75,17 @@ export default class extends PureComponent {
     })
     .then((response) => response.json())
     .then((json) => {
-      console.log(JSON.stringify(json));
+      // console.log(JSON.stringify(json));
+      if (!json.status) {
+        this.setState({
+          formValid: false,
+          errorMessage: json.message
+        });
+      }
+      else {
+        window.location.replace('/profile');
+      }
+
     })
     .catch((err) => {
       console.log(`Server error: ${err}`);
@@ -70,6 +93,33 @@ export default class extends PureComponent {
 
   }
 
+  _renderEmailAlert = () => {
+    if (this.state.emailValid) return null;
+    return (
+      <div className="alert-container">
+        <Alert
+          message="Error"
+          description="Debes ingresar un email valido."
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
+
+  _renderAlert = () => {
+    if (this.state.formValid) return null;
+    return (
+      <div className="alert-container">
+        <Alert
+          message="Error"
+          description={this.state.errorMessage}
+          type="error"
+          showIcon
+        />
+      </div>
+    );
+  }
 
   render() {
     const { userName, userPassword } = this.state;
@@ -98,11 +148,18 @@ export default class extends PureComponent {
           .layout-footer {
             text-align: center;
           }
+          .alert-container {
+            position: absolute;
+            width: 70%;
+            bottom: 90px;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+          }
         `}</style>
         <Layout>
 
           <Content className="layout-form">
-
             <Form className="login-form">
               <FormItem>
                 <Input
@@ -138,8 +195,10 @@ export default class extends PureComponent {
 
               </FormItem>
             </Form>
-
           </Content>
+
+          {this._renderEmailAlert()}
+          {this._renderAlert()}
 
           <Footer className="layout-footer">
             <p>NextCMS ©{this.date} - Develop by Mariano Molina.</p>

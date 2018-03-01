@@ -3,8 +3,8 @@ const next = require('next');
 const bodyParser = require('body-parser');
 const routes = require('./routes/router');
 const mongoose = require('mongoose');
-const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+let expressSession = require('express-session');
+let MongoStore = require('connect-mongo')(expressSession);
 
 
 const port = parseInt(process.env.PORT, 10) || 3000;
@@ -28,24 +28,25 @@ app.prepare()
     // we're connected!
   });
 
-  // use sessions for tracking logins
-  server.use(session({
-    secret: 'nextAdminSecretKey',
-    resave: true,
-    saveUninitialized: false,
-    store: new MongoStore({
-      mongooseConnection: db
-    })
-  }));
-
   // middleware
   // parse incoming request
   server.use(bodyParser.urlencoded({ extended: false }));
   server.use(bodyParser.json());
 
-  // use routes
-  server.use('/', routes);
+  // use sessions for tracking logins
+  server.use(expressSession({
+    secret: '123456',
+    resave: false,
+    saveUninitialized: false,
+    maxAge: Date.now() + (30 * 86400 * 1000),
+    cookie: {maxAge: 1000*60*60*24*30}, //30 days
+    store: new MongoStore({
+      mongooseConnection: db
+    })
+  }));
 
+  // use routes
+  server.use(routes);
 
   server.get('*', (req, res) => {
     return handle(req, res);
@@ -58,3 +59,5 @@ app.prepare()
   });
 
 });
+
+module.exports = app;
